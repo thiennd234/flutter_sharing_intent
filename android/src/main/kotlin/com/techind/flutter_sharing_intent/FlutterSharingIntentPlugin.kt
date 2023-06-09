@@ -116,6 +116,7 @@ class FlutterSharingIntentPlugin: FlutterPlugin, ActivityAware, MethodCallHandle
           JSONObject()
             .put("value", intent.dataString)
             .put("type", MediaType.URL.ordinal)
+            .put("action", intent.action)
         )
         if (initial) initialSharing = value
         latestSharing = value
@@ -143,6 +144,7 @@ class FlutterSharingIntentPlugin: FlutterPlugin, ActivityAware, MethodCallHandle
               .put("type", type.ordinal)
               .put("thumbnail", thumbnail)
               .put("duration", duration)
+              .put("action", intent.action)
           )
         } else null
       }
@@ -159,6 +161,7 @@ class FlutterSharingIntentPlugin: FlutterPlugin, ActivityAware, MethodCallHandle
             .put("type", type.ordinal)
             .put("thumbnail", thumbnail)
             .put("duration", duration)
+            .put("action", intent.action)
         }?.toList()
         if (value != null) JSONArray(value) else null
       }
@@ -178,6 +181,7 @@ class FlutterSharingIntentPlugin: FlutterPlugin, ActivityAware, MethodCallHandle
             JSONObject()
               .put("value", text)
               .put("type", type)
+              .put("action", intent.action)
           )
         } else null
       }
@@ -192,6 +196,7 @@ class FlutterSharingIntentPlugin: FlutterPlugin, ActivityAware, MethodCallHandle
           return@mapNotNull JSONObject()
             .put("value", path)
             .put("type", type)
+            .put("action", intent.action)
         }?.toList()
         if (value != null) JSONArray(value) else null
       }

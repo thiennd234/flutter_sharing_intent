@@ -84,46 +84,51 @@ class FlutterSharingIntentPlugin: FlutterPlugin, ActivityAware, MethodCallHandle
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
     channel.setMethodCallHandler(null)
+    initialSharing = null
+    latestSharing = null
     eventChannel.setStreamHandler(null)
   }
 
   private fun handleIntent(intent: Intent, initial: Boolean) {
-    Log.w(TAG,"handleIntent ==>> ${intent.action}, ${intent.type}")
-    when {
-      (intent.type?.startsWith("text") != true)
-              && (intent.action == Intent.ACTION_SEND
-              || intent.action == Intent.ACTION_SEND_MULTIPLE) -> { // Sharing images or videos
+    val intentFlags = intent.getFlags()
+    if ((intentFlags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) == 0){
+      Log.w(TAG,"handleIntent ==>> ${intent.action}, ${intent.type}")
+      when {
+        (intent.type?.startsWith("text") != true)
+                && (intent.action == Intent.ACTION_SEND
+                || intent.action == Intent.ACTION_SEND_MULTIPLE) -> { // Sharing images or videos
 
 
-        val value = getSharingUris(intent)
-        if (initial) initialSharing = value
-        latestSharing = value
-        Log.w(TAG,"handleIntent ==>> $value")
-        eventSinkSharing?.success(value?.toString())
+          val value = getSharingUris(intent)
+          if (initial) initialSharing = value
+          latestSharing = value
+          Log.w(TAG,"handleIntent ==>> $value")
+          eventSinkSharing?.success(value?.toString())
+        }
+        (intent.type == null || intent.type?.startsWith("text") == true)
+                && (intent.action == Intent.ACTION_SEND || intent.action == Intent.ACTION_SEND_MULTIPLE) -> { // Sharing text
+
+          val value = getSharingText(intent) ?: getSharingUris(intent)
+          if (initial) initialSharing = value
+          latestSharing = value
+          Log.w(TAG,"handleIntent ==>> $value")
+          eventSinkSharing?.success(value?.toString())
+
+        }
+        intent.action == Intent.ACTION_VIEW -> { // Opening URL
+          val value = JSONArray().put(
+            JSONObject()
+              .put("value", intent.dataString)
+              .put("type", MediaType.URL.ordinal)
+              .put("action", intent.action)
+          )
+          if (initial) initialSharing = value
+          latestSharing = value
+          Log.w(TAG,"handleIntent ==>> $value")
+          eventSinkSharing?.success(value?.toString())
+        }
       }
-      (intent.type == null || intent.type?.startsWith("text") == true)
-              && intent.action == Intent.ACTION_SEND -> { // Sharing text
-
-        val value = getSharingText(intent)
-        if (initial) initialSharing = value
-        latestSharing = value
-        Log.w(TAG,"handleIntent ==>> $value")
-        eventSinkSharing?.success(value?.toString())
-
-      }
-      intent.action == Intent.ACTION_VIEW -> { // Opening URL
-        val value = JSONArray().put(
-          JSONObject()
-            .put("value", intent.dataString)
-            .put("type", MediaType.URL.ordinal)
-            .put("action", intent.action)
-        )
-        if (initial) initialSharing = value
-        latestSharing = value
-        Log.w(TAG,"handleIntent ==>> $value")
-        eventSinkSharing?.success(value?.toString())
-      }
-    }
+    }    
   }
 
   private fun getSharingUris(intent: Intent?): JSONArray? {

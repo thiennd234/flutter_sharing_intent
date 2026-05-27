@@ -13,8 +13,8 @@ Pod::Spec.new do |s|
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'techind' => 'techind@gmail.com' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
-  s.public_header_files = 'Classes/**/*.h'
+  s.source_files = 'Sources/flutter_sharing_intent/**/*'
+  s.public_header_files = 'Sources/flutter_sharing_intent/**/*.h'
   s.dependency 'Flutter'
   s.platform = :ios, '12.0'
 

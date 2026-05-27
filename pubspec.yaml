@@ -40,4 +40,6 @@ flutter:
         pluginClass: FlutterSharingIntentPlugin
       ios:
         pluginClass: FlutterSharingIntentPlugin
+        spm:
+          packageName: flutter_sharing_intent
 

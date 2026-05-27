@@ -1,5 +1,6 @@
 package com.techind.flutter_sharing_intent
 
+import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -99,33 +100,46 @@ class FlutterSharingIntentPlugin: FlutterPlugin, ActivityAware, MethodCallHandle
                 || intent.action == Intent.ACTION_SEND_MULTIPLE) -> { // Sharing images or videos
 
 
-          val value = getSharingUris(intent)
-          if (initial) initialSharing = value
-          latestSharing = value
-          Log.w(TAG,"handleIntent ==>> $value")
-          eventSinkSharing?.success(value?.toString())
-        }
-        (intent.type == null || intent.type?.startsWith("text") == true)
-                && (intent.action == Intent.ACTION_SEND || intent.action == Intent.ACTION_SEND_MULTIPLE) -> { // Sharing text
+            val value = getSharingUris(intent)
+            if (initial) initialSharing = value
+            latestSharing = value
+            Log.w(TAG,"Image/Video : handleIntent ==>> $value")
+            eventSinkSharing?.success(value?.toString())
+          }
+          (intent.type == null || intent.type?.startsWith("text") == true)
+                  && ((intent.action == Intent.ACTION_SEND || intent.action == Intent.ACTION_SEND_MULTIPLE) || intent.action == Intent.ACTION_SEND_MULTIPLE) -> { // Sharing text
 
-          val value = getSharingText(intent) ?: getSharingUris(intent)
-          if (initial) initialSharing = value
-          latestSharing = value
-          Log.w(TAG,"handleIntent ==>> $value")
+            val value = getSharingText(intent) ?: getSharingUris(intent) ?: getSharingUris(intent)
+            if (initial) initialSharing = value
+            latestSharing = value
+            Log.w(TAG,"text : handleIntent ==>> $value")
+  //          Log.w(TAG,"text : handleIntent ==>> ${eventSinkSharing!=null}")
           eventSinkSharing?.success(value?.toString())
 
-        }
-        intent.action == Intent.ACTION_VIEW -> { // Opening URL
-          val value = JSONArray().put(
-            JSONObject()
-              .put("value", intent.dataString)
-              .put("type", MediaType.URL.ordinal)
+          }
+          intent.action == Intent.ACTION_VIEW -> { // Opening URL
+            val value = JSONArray().put(
+              JSONObject()
+                .put("value", intent.dataString)
+                .put("type", MediaType.URL.ordinal)
               .put("action", intent.action)
-          )
-          if (initial) initialSharing = value
-          latestSharing = value
-          Log.w(TAG,"handleIntent ==>> $value")
+            )
+            if (initial) initialSharing = value
+            latestSharing = value
+            Log.w(TAG,"ACTION_VIEW : handleIntent ==>> $value")
           eventSinkSharing?.success(value?.toString())
+        }
+        intent.action == Intent.ACTION_WEB_SEARCH -> {
+            val value = JSONArray().put(
+                JSONObject()
+                    .put("value", intent.getStringExtra(SearchManager.QUERY))
+                    .put("type", MediaType.WEB_SEARCH.ordinal)
+            )
+            if (initial) initialSharing = value
+            latestSharing = value
+            Log.w(TAG,"ACTION_WEB_SEARCH : handleIntent ==>> $value")
+              eventSinkSharing?.success(value?.toString())
+        }
         }
       }
     }    
@@ -223,6 +237,7 @@ class FlutterSharingIntentPlugin: FlutterPlugin, ActivityAware, MethodCallHandle
       mimeType?.startsWith("video") == true -> MediaType.VIDEO
       mimeType?.startsWith("text") == true -> MediaType.TEXT
       mimeType?.startsWith("url") == true -> MediaType.URL
+      mimeType?.startsWith("web_search") == true -> MediaType.WEB_SEARCH
       else -> MediaType.FILE
     }
   }
@@ -251,7 +266,7 @@ class FlutterSharingIntentPlugin: FlutterPlugin, ActivityAware, MethodCallHandle
   }
 
   enum class MediaType {
-    TEXT, URL, IMAGE, VIDEO, FILE ;
+    TEXT, URL, IMAGE, VIDEO, FILE, WEB_SEARCH ;
   }
 
   override fun onNewIntent(intent: Intent): Boolean {
@@ -279,12 +294,23 @@ class FlutterSharingIntentPlugin: FlutterPlugin, ActivityAware, MethodCallHandle
   }
 
   override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+    Log.d(TAG,"onListen ==>> $arguments, $events")
     when (arguments) {
-      "sharing" -> eventSinkSharing = events
+//      "sharing" -> eventSinkSharing = events
+      "sharing" -> {
+        eventSinkSharing = events
+
+
+        latestSharing?.let {
+          Log.d(TAG, "Sending cached sharing data onListen: $it")
+//          eventSinkSharing?.success(it.toString())
+        }
+      }
     }
   }
 
   override fun onCancel(arguments: Any?) {
+    Log.d(TAG,"onCancel ==>> $arguments")
     when (arguments) {
       "sharing" -> eventSinkSharing = null
     }

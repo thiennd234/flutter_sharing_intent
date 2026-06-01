@@ -107,14 +107,13 @@ class FlutterSharingIntentPlugin: FlutterPlugin, ActivityAware, MethodCallHandle
             eventSinkSharing?.success(value?.toString())
           }
           (intent.type == null || intent.type?.startsWith("text") == true)
-                  && ((intent.action == Intent.ACTION_SEND || intent.action == Intent.ACTION_SEND_MULTIPLE) || intent.action == Intent.ACTION_SEND_MULTIPLE) -> { // Sharing text
+                  && (intent.action == Intent.ACTION_SEND || intent.action == Intent.ACTION_SEND_MULTIPLE) -> { // Sharing text
 
-            val value = getSharingText(intent) ?: getSharingUris(intent) ?: getSharingUris(intent)
+            val value = getSharingText(intent) ?: getSharingUris(intent)
             if (initial) initialSharing = value
             latestSharing = value
             Log.w(TAG,"text : handleIntent ==>> $value")
-  //          Log.w(TAG,"text : handleIntent ==>> ${eventSinkSharing!=null}")
-          eventSinkSharing?.success(value?.toString())
+            eventSinkSharing?.success(value?.toString())
 
           }
           intent.action == Intent.ACTION_VIEW -> { // Opening URL
@@ -127,18 +126,19 @@ class FlutterSharingIntentPlugin: FlutterPlugin, ActivityAware, MethodCallHandle
             if (initial) initialSharing = value
             latestSharing = value
             Log.w(TAG,"ACTION_VIEW : handleIntent ==>> $value")
-          eventSinkSharing?.success(value?.toString())
+            eventSinkSharing?.success(value?.toString())
         }
         intent.action == Intent.ACTION_WEB_SEARCH -> {
             val value = JSONArray().put(
                 JSONObject()
                     .put("value", intent.getStringExtra(SearchManager.QUERY))
                     .put("type", MediaType.WEB_SEARCH.ordinal)
+                    .put("action", intent.action)
             )
             if (initial) initialSharing = value
             latestSharing = value
             Log.w(TAG,"ACTION_WEB_SEARCH : handleIntent ==>> $value")
-              eventSinkSharing?.success(value?.toString())
+            eventSinkSharing?.success(value?.toString())
         }
         }
       }
@@ -208,12 +208,10 @@ class FlutterSharingIntentPlugin: FlutterPlugin, ActivityAware, MethodCallHandle
         val textList = intent.getStringArrayListExtra(Intent.EXTRA_TEXT)
 
         val value = textList?.mapNotNull { text ->
-          val path = text
-            ?: return@mapNotNull null
-          val type = getTypeForTextAndUrl(path)
+          val type = getTypeForTextAndUrl(text)
 
           return@mapNotNull JSONObject()
-            .put("value", path)
+            .put("value", text)
             .put("type", type)
             .put("action", intent.action)
         }?.toList()
@@ -296,14 +294,11 @@ class FlutterSharingIntentPlugin: FlutterPlugin, ActivityAware, MethodCallHandle
   override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
     Log.d(TAG,"onListen ==>> $arguments, $events")
     when (arguments) {
-//      "sharing" -> eventSinkSharing = events
       "sharing" -> {
         eventSinkSharing = events
-
-
         latestSharing?.let {
           Log.d(TAG, "Sending cached sharing data onListen: $it")
-//          eventSinkSharing?.success(it.toString())
+          eventSinkSharing?.success(it.toString())
         }
       }
     }

@@ -35,15 +35,15 @@ class SharedFile {
   });
 
   SharedFile.fromJson(Map<String, dynamic> json)
-    : value = json['value'] ?? json['value'],
-      action = json['action'],
-      thumbnail = json['thumbnail'],
-      duration = json['duration'],
-      type = json['type'] is int
-          ? SharedMediaType.values[json['type']]
-          : SharedMediaType.OTHER,
-      mimeType = json['mimeType'],
-      message = json['message'];
+      : value = json['value'] ?? json['value'],
+        action = json['action'],
+        thumbnail = json['thumbnail'],
+        duration = json['duration'],
+        type = json['type'] is int
+            ? SharedMediaType.values[json['type']]
+            : SharedMediaType.OTHER,
+        mimeType = json['mimeType'],
+        message = json['message'];
 
   Map<String, dynamic> toMap() {
     return {
@@ -76,8 +76,8 @@ enum IntentActionType {
   final String value;
   const IntentActionType(this.value);
 
-  static bool isView(action) => [view.value].contains(action);
+  static bool isView(String? action) => [view.value].contains(action);
 
-  static bool isSend(action) =>
+  static bool isSend(String? action) =>
       [send.value, sendMultiple.value].contains(action);
 }

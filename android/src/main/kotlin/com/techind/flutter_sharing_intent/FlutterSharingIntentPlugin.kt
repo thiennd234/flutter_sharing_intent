@@ -143,7 +143,6 @@ class FlutterSharingIntentPlugin: FlutterPlugin, ActivityAware, MethodCallHandle
         }
       }
     }    
-  }
 
   private fun getSharingUris(intent: Intent?): JSONArray? {
     if (intent == null) return null

@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## 2.1.0
+* Migrated Android plugin to built-in Kotlin (KGP 2.0+)
+* Lowered minimum Flutter version to 3.3.0 (Dart 3.0.0) — adds legacy support
+* Android compileOptions upgraded to Java 17 (aligns with kotlin jvmTarget)
+* AGP 9 compatible: Kotlin Gradle Plugin applied only when AGP < 9
+
 ## 2.0.4
 * Fixed iOS issue #72
 * Update README.md

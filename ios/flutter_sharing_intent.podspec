@@ -29,7 +29,7 @@ Pod::Spec.new do |s|
 
   # Add resource bundle for Apple manifest policy
   s.resource_bundle = {
-    'MySDKPrivacy' => ['Resources/PrivacyInfo.xcprivacy']
+    'MySDKPrivacy' => ['Sources/flutter_sharing_intent/Resources/PrivacyInfo.xcprivacy']
   }
   s.swift_version = '5.0'
 end

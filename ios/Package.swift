@@ -18,7 +18,7 @@ let package = Package(
             name: "flutter_sharing_intent",
             dependencies: [],
             resources: [
-                .process("../../Resources/PrivacyInfo.xcprivacy")
+                .process("Resources")
             ]
         )
     ]
